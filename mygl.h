@@ -6,108 +6,104 @@
 #include "definitions.h"
 
 //******************************************************************************
-//estruturas para facilitar as chamadas nas funções
+    //estrutura das posicao do pixel
     typedef struct{
         unsigned int X;
         unsigned int Y;
-    }tCoordenadas;
-
+    }tPosicao;
+    //estrutura do pixel e suas respectivas caracterÃ­sticas
     typedef struct{
-        tCoordenadas coordenadas;
-        unsigned int valorR;
-        unsigned int valorG;
-        unsigned int valorB;
-        unsigned int valorA;
+        tPosicao posicao;
+        unsigned int R;
+        unsigned int G;
+        unsigned int B;
+        unsigned int A;
     }tPixel;
 
 //******************************************************************************
 
 //*****************************************************************************
-// Defina aqui as suas funções gráficas
+// Defina aqui as suas funÃ§Ãµes grÃ¡ficas
 
-
-    void pintaTela (){
-        for (unsigned int i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT ; i++){
-            FBptr[i*4]   = 255; //R
-            FBptr[i*4+1] = 255; //G
-            FBptr[i*4+2] = 255; //B
-            FBptr[i*4+3] = 255; //A
-        }
-    }
 
     void putPixel(tPixel pixel){
         int offset;
-        if (pixel.coordenadas.X >= 0 && pixel.coordenadas.X <=IMAGE_WIDTH
-            &&pixel.coordenadas.Y >=0 && pixel.coordenadas.Y <= IMAGE_HEIGHT){
+        if (pixel.posicao.X >= 0 && pixel.posicao.X <=IMAGE_WIDTH
+            &&pixel.posicao.Y >=0 && pixel.posicao.Y <= IMAGE_HEIGHT){
 
-            offset = 4*(IMAGE_WIDTH*pixel.coordenadas.Y + pixel.coordenadas.X);
-
-            FBptr[offset]   = pixel.valorR;
-            FBptr[offset+1] = pixel.valorB;
-            FBptr[offset+2] = pixel.valorG;
-            FBptr[offset+3] = pixel.valorA;
+            offset = (IMAGE_WIDTH*pixel.posicao.Y + pixel.posicao.X)*4;
+            FBptr[offset]   = pixel.R;
+            FBptr[offset+1] = pixel.B;
+            FBptr[offset+2] = pixel.G;
+            FBptr[offset+3] = pixel.A;
 
             }
         else{
-            printf("pixel fora do intervalo\n");
+            printf("Tente um valor entre %d e %d", IMAGE_WIDTH, IMAGE_HEIGHT);
         }
     }
 
     void drawLine(tPixel primeiro, tPixel ultimo){
-        int deltaX = ultimo.coordenadas.X - primeiro.coordenadas.X;
-        int deltaY = ultimo.coordenadas.Y - primeiro.coordenadas.Y;
         int d;
         int incrementaLeste;
         int incrementaNordeste;
         int incrementaX=0;
         int incrementaY=0;
+        int deltaX = ultimo.posicao.X - primeiro.posicao.X;
+        int deltaY = ultimo.posicao.Y - primeiro.posicao.Y;
 
-        //se o delta for negativo decrementa, se for positivo, incrementa
+        //se o delta for negativo decrementa
+        // o valor de incrementaX Ã© 1, caso contrÃ¡rio Ã© -1
         if (deltaX>0){
             incrementaX=1;
         }else{
             incrementaX=-1;
-            deltaX=abs(deltaX); //trabalhar com módulo (valor positivo)
+            //mÃ³dulo de deltaX
+            deltaX=abs(deltaX); 
         }
         if(deltaY>0){
             incrementaY=1;
         }else{
             incrementaY=-1;
-            deltaY=abs(deltaY); //trabalhar com módulo (valor positivo)
+            //mÃ³dulo de deltaY
+            deltaY=abs(deltaY); 
         }
 
+        //posicao e caracterÃ­sticas do pixel 
         tPixel atual;
-        //ter as coordenadas inciais do primeiro pixel
-        atual.coordenadas.X = primeiro.coordenadas.X;
-        atual.coordenadas.Y = primeiro.coordenadas.Y;
-        //ter as cores do ultimo pixel
-        atual.valorR = ultimo.valorR;
-        atual.valorG = ultimo.valorG;
-        atual.valorB = ultimo.valorB;
-        atual.valorA = ultimo.valorA;
+        atual.posicao.X = primeiro.posicao.X;
+        atual.posicao.Y = primeiro.posicao.Y;
+        atual.R = ultimo.R;
+        atual.G = ultimo.G;
+        atual.B = ultimo.B;
+        atual.A = ultimo.A;
 
-        if (deltaX == 0){ //é uma coluna
-            for (atual.coordenadas.Y ; atual.coordenadas.Y != ultimo.coordenadas.Y; atual.coordenadas.Y+=incrementaY){
+        //se delta X for igual a zero, temos uma coluna
+        //se delta X for diferente de zero e 
+        //delta Y for igual a zero temos uma linha
+        if (deltaX == 0){
+            for (atual.posicao.Y ; atual.posicao.Y != ultimo.posicao.Y; atual.posicao.Y+=incrementaY){
                 putPixel(atual);
             }
-        }else{ //deltaX !=0
+        }else{
             if (deltaY == 0){ //linha horizontal
-                for (atual.coordenadas.X; atual.coordenadas.X!=ultimo.coordenadas.X; atual.coordenadas.X+=incrementaX){
+                for (atual.posicao.X; atual.posicao.X!=ultimo.posicao.X; atual.posicao.X+=incrementaX){
                     putPixel(atual);
                 }
-            }else{ //nem é uma linha nem uma coluna
+            }else{ 
+                //caso de nÃ£o ser uma reta horizontal/vertical
                 if (abs(deltaX)>=abs(deltaY)){
                     d=2*deltaY-deltaX;
                     incrementaLeste=2*deltaY;
                     incrementaNordeste=2*(deltaY-deltaX);
-                    while(atual.coordenadas.X!=ultimo.coordenadas.X){
+                    while(atual.posicao.X!=ultimo.posicao.X){
                         if(d<=0){
                             d+=incrementaLeste;
-                            atual.coordenadas.X+=incrementaX;
+                            atual.posicao.X+=incrementaX;
                         }else{
                             d+=incrementaNordeste;
-                            atual.coordenadas.X+=incrementaX;
-                            atual.coordenadas.Y+=incrementaY;
+                            atual.posicao.X+=incrementaX;
+                            atual.posicao.Y+=incrementaY;
                         }
                         putPixel(atual);
                     }
@@ -116,14 +112,14 @@
                     d=2*deltaX-deltaY;
                     incrementaLeste=2*deltaX;
                     incrementaNordeste=2*(deltaX-deltaY);
-                    while(atual.coordenadas.Y!=ultimo.coordenadas.Y){
+                    while(atual.posicao.Y!=ultimo.posicao.Y){
                         if(d<=0){
                             d+=incrementaLeste;
-                            atual.coordenadas.Y+=incrementaY;
+                            atual.posicao.Y+=incrementaY;
                         }else{
                             d+=incrementaNordeste;
-                            atual.coordenadas.Y+=incrementaY;
-                            atual.coordenadas.X+=incrementaX;
+                            atual.posicao.Y+=incrementaY;
+                            atual.posicao.X+=incrementaX;
                         }
                         putPixel(atual);
                     }
@@ -135,99 +131,88 @@
     }
 
     void interpolar(tPixel primeiro,tPixel ultimo,tPixel *atual){
-        float deltaX = (float)(ultimo.coordenadas.X - primeiro.coordenadas.X);
-        float deltaY = (float)(ultimo.coordenadas.Y - primeiro.coordenadas.Y);
-
-        int incA, incB, incR, incG;
+        
+        int R, G, B, A;
+        float deltaX = (float)(ultimo.posicao.X - primeiro.posicao.X);
+        float deltaY = (float)(ultimo.posicao.Y - primeiro.posicao.Y);
 
         if (abs(deltaX) >= abs(deltaY) ){
-            incR = (ultimo.valorR - primeiro.valorR)/deltaX;
-            incG = (ultimo.valorG - primeiro.valorG)/deltaX;
-            incB = (ultimo.valorB - primeiro.valorB)/deltaX;
-            incA = (ultimo.valorA - primeiro.valorA)/deltaX;
+            R = (ultimo.R - primeiro.R)/deltaX;
+            G = (ultimo.G - primeiro.G)/deltaX;
+            B = (ultimo.B - primeiro.B)/deltaX;
+            A = (ultimo.A - primeiro.A)/deltaX;
         }
         else{
-            incR = (ultimo.valorR - primeiro.valorR)/deltaY;
-            incG = (ultimo.valorG - primeiro.valorG)/deltaY;
-            incB = (ultimo.valorB - primeiro.valorB)/deltaY;
-            incA = (ultimo.valorA - primeiro.valorA)/deltaY;
+            R = (ultimo.R - primeiro.R)/deltaY;
+            G = (ultimo.G - primeiro.G)/deltaY;
+            B = (ultimo.B - primeiro.B)/deltaY;
+            A = (ultimo.A - primeiro.A)/deltaY;
         }
-
-        /*
-            float comprimento = sqrt(deltaX*deltaX+deltaY*deltaY);
-            float incR = (float)(ultimo.valorR - primeiro.valorR)/comprimento;
-            float incG = (float)(ultimo.valorG - primeiro.valorG)/comprimento;
-            float incB = (float)(ultimo.valorB - primeiro.valorB)/comprimento;
-            //static int incA = (ultimo.valorA - primeiro.valorA)/comprimento;
-        */
-
-        atual->valorA+=incA;
-        atual->valorR+=incR;
-        atual->valorG+=incG;
-        atual->valorB+=incB;
-
+        
+        atual->R+=R;
+        atual->G+=G;
+        atual->B+=B;
+        atual->A+=A;
+ 
         putPixel(*atual);
     }
 
 
     void drawLineInterpolado (tPixel primeiro, tPixel ultimo){
 
-        int deltaX = ultimo.coordenadas.X - primeiro.coordenadas.X;
-        int deltaY = ultimo.coordenadas.Y - primeiro.coordenadas.Y;
+        int deltaX = ultimo.posicao.X - primeiro.posicao.X;
+        int deltaY = ultimo.posicao.Y - primeiro.posicao.Y;
         int d;
         int incrementaLeste;
         int incrementaNordeste;
         int incrementaX=0;
         int incrementaY=0;
 
-       //se o delta for negativo decrementa, se for positivo, incrementa
+       
         if (deltaX>0){
             incrementaX=1;
         }else if (deltaX < 0){
             incrementaX=-1;
-            deltaX=abs(deltaX); //trabalhar com módulo (valor positivo)
+            deltaX=abs(deltaX); 
         }
         if(deltaY>0){
             incrementaY=1;
         }else if (deltaY<0){
             incrementaY=-1;
-            deltaY=abs(deltaY); //trabalhar com módulo (valor positivo)
-        }
+            deltaY=abs(deltaY); 
 
         tPixel atual;
-        //ter as coordenadas inciais do primeiro pixel
-        atual.coordenadas.X = primeiro.coordenadas.X;
-        atual.coordenadas.Y = primeiro.coordenadas.Y;
-        //ter as cores do primeiro pixel
-        atual.valorR = primeiro.valorR;
-        atual.valorG = primeiro.valorG;
-        atual.valorB = primeiro.valorB;
-        atual.valorA = primeiro.valorA;
+        atual.posicao.X = primeiro.posicao.X;
+        atual.posicao.Y = primeiro.posicao.Y;
+        atual.R = primeiro.R;
+        atual.G = primeiro.G;
+        atual.B = primeiro.B;
+        atual.A = primeiro.A;
 
-        if (deltaX == 0){ //é uma coluna
-            for (atual.coordenadas.Y ; atual.coordenadas.Y != ultimo.coordenadas.Y; atual.coordenadas.Y+=incrementaY){
+        if (deltaX == 0){
+            for (atual.posicao.Y ; atual.posicao.Y != ultimo.posicao.Y; atual.posicao.Y+=incrementaY){
                 interpolar(primeiro, ultimo, &atual);
 
             }
-        }else{ //deltaX !=0
-            if (deltaY == 0){ //linha horizontal
-                for (atual.coordenadas.X; atual.coordenadas.X!=ultimo.coordenadas.X; atual.coordenadas.X+=incrementaX){
+        }else{ 
+            if (deltaY == 0){ 
+                for (atual.posicao.X; atual.posicao.X!=ultimo.posicao.X; atual.posicao.X+=incrementaX){
                     interpolar(primeiro, ultimo, &atual);
 
                 }
-            }else{ //nem é uma linha nem uma coluna
+            }else{ 
                 if (abs(deltaX)>=abs(deltaY)){
                     d=2*deltaY-deltaX;
                     incrementaLeste=2*deltaY;
                     incrementaNordeste=2*(deltaY-deltaX);
-                    while(atual.coordenadas.X!=ultimo.coordenadas.X){
+                    while(atual.posicao.X!=ultimo.posicao.X){
                         if(d<=0){
                             d+=incrementaLeste;
-                            atual.coordenadas.X+=incrementaX;
+                            atual.posicao.X+=incrementaX;
                         }else{
                             d+=incrementaNordeste;
-                            atual.coordenadas.X+=incrementaX;
-                            atual.coordenadas.Y+=incrementaY;
+                            atual.posicao.X+=incrementaX;
+                            atual.posicao.Y+=incrementaY;
                         }
                         interpolar(primeiro, ultimo, &atual);
 
@@ -237,14 +222,14 @@
                     d=2*deltaX-deltaY;
                     incrementaLeste=2*deltaX;
                     incrementaNordeste=2*(deltaX-deltaY);
-                    while(atual.coordenadas.Y!=ultimo.coordenadas.Y){
+                    while(atual.posicao.Y!=ultimo.posicao.Y){
                         if(d<=0){
                             d+=incrementaLeste;
-                            atual.coordenadas.Y+=incrementaY;
+                            atual.posicao.Y+=incrementaY;
                         }else{
                             d+=incrementaNordeste;
-                            atual.coordenadas.Y+=incrementaY;
-                            atual.coordenadas.X+=incrementaX;
+                            atual.posicao.Y+=incrementaY;
+                            atual.posicao.X+=incrementaX;
                         }
                         interpolar(primeiro, ultimo, &atual);
 
@@ -254,11 +239,6 @@
             }
         }
 
-    }
-    void drawTriangleInterpolado (tPixel p1, tPixel p2, tPixel p3 ){
-        drawLineInterpolado(p2,p1);
-        drawLineInterpolado(p3,p2);
-        drawLineInterpolado(p1,p3);
     }
 
     void drawTriangle(tPixel p1, tPixel p2, tPixel p3 ){
@@ -267,161 +247,70 @@
         drawLine(p1,p3);
     }
 
-    void drawTriangleFull (tPixel primeiro, tPixel ultimo, tPixel p3 ){
-        int deltaX = ultimo.coordenadas.X - primeiro.coordenadas.X;
-        int deltaY = ultimo.coordenadas.Y - primeiro.coordenadas.Y;
+
+    void pintaTrianguloInterpolado (tPixel primeiro, tPixel ultimo, tPixel p3){
+        int deltaX = ultimo.posicao.X - primeiro.posicao.X;
+        int deltaY = ultimo.posicao.Y - primeiro.posicao.Y;
         int d;
         int incrementaLeste;
         int incrementaNordeste;
         int incrementaX=0;
         int incrementaY=0;
 
-        //se o delta for negativo decrementa, se for positivo, incrementa
         if (deltaX>0){
             incrementaX=1;
         }else{
             incrementaX=-1;
-            deltaX=abs(deltaX); //trabalhar com módulo (valor positivo)
+            deltaX=abs(deltaX); 
         }
         if(deltaY>0){
             incrementaY=1;
         }else{
             incrementaY=-1;
-            deltaY=abs(deltaY); //trabalhar com módulo (valor positivo)
+            deltaY=abs(deltaY); 
         }
 
         tPixel atual;
-        //ter as coordenadas inciais do primeiro pixel
-        atual.coordenadas.X = primeiro.coordenadas.X;
-        atual.coordenadas.Y = primeiro.coordenadas.Y;
-        //ter as cores do primeiro pixel
-        atual.valorR = primeiro.valorR;
-        atual.valorG = primeiro.valorG;
-        atual.valorB = primeiro.valorB;
-        atual.valorA = primeiro.valorA;
+        atual.posicao.X = primeiro.posicao.X;
+        atual.posicao.Y = primeiro.posicao.Y;
+        atual.R = primeiro.R;
+        atual.G = primeiro.G;
+        atual.B = primeiro.B;
+        atual.A = primeiro.A;
 
-        //incrementar cores aos poucos
+        
         int comprimento = sqrt(deltaX*deltaX+deltaY*deltaY);
-        int incR = (ultimo.valorR - primeiro.valorR)/comprimento;
-        int incG = (ultimo.valorG - primeiro.valorG)/comprimento;
-        int incB = (ultimo.valorB - primeiro.valorB)/comprimento;
-        int incA = (ultimo.valorA - primeiro.valorA)/comprimento;
+        int incR = (ultimo.R - primeiro.R)/comprimento;
+        int incG = (ultimo.G - primeiro.G)/comprimento;
+        int incB = (ultimo.B - primeiro.B)/comprimento;
+        int incA = (ultimo.A - primeiro.A)/comprimento;
 
-        if (deltaX == 0){ //é uma coluna
-            for (atual.coordenadas.Y ; atual.coordenadas.Y != ultimo.coordenadas.Y; atual.coordenadas.Y+=incrementaY){
-
-                drawLine(atual,p3);
-            }
-        }else{ //deltaX !=0
-            if (deltaY == 0){ //linha horizontal
-                for (atual.coordenadas.X; atual.coordenadas.X!=ultimo.coordenadas.X; atual.coordenadas.X+=incrementaX){
-                    drawLine(atual,p3);
-                }
-            }else{ //nem é uma linha nem uma coluna
-                if (abs(deltaX)>=abs(deltaY)){
-                    d=2*deltaY-deltaX;
-                    incrementaLeste=2*deltaY;
-                    incrementaNordeste=2*(deltaY-deltaX);
-                    while(atual.coordenadas.X!=ultimo.coordenadas.X){
-                        if(d<=0){
-                            d+=incrementaLeste;
-                            atual.coordenadas.X+=incrementaX;
-                        }else{
-                            d+=incrementaNordeste;
-                            atual.coordenadas.X+=incrementaX;
-                            atual.coordenadas.Y+=incrementaY;
-                        }
-                        drawLine(atual,p3);
-                    }
-
-                }else {
-                    d=2*deltaX-deltaY;
-                    incrementaLeste=2*deltaX;
-                    incrementaNordeste=2*(deltaX-deltaY);
-                    while(atual.coordenadas.Y!=ultimo.coordenadas.Y){
-                        if(d<=0){
-                            d+=incrementaLeste;
-                            atual.coordenadas.Y+=incrementaY;
-                        }else{
-                            d+=incrementaNordeste;
-                            atual.coordenadas.Y+=incrementaY;
-                            atual.coordenadas.X+=incrementaX;
-                        }
-                        drawLine(atual,p3);
-                    }
-
-                }
-            }
-        }
-    }
-
-    //teste fazer um triangulo pintado internamente
-    void drawTriangleFullInterpolado (tPixel primeiro, tPixel ultimo, tPixel p3){
-        int deltaX = ultimo.coordenadas.X - primeiro.coordenadas.X;
-        int deltaY = ultimo.coordenadas.Y - primeiro.coordenadas.Y;
-        int d;
-        int incrementaLeste;
-        int incrementaNordeste;
-        int incrementaX=0;
-        int incrementaY=0;
-
-        //se o delta for negativo decrementa, se for positivo, incrementa
-        if (deltaX>0){
-            incrementaX=1;
-        }else{
-            incrementaX=-1;
-            deltaX=abs(deltaX); //trabalhar com módulo (valor positivo)
-        }
-        if(deltaY>0){
-            incrementaY=1;
-        }else{
-            incrementaY=-1;
-            deltaY=abs(deltaY); //trabalhar com módulo (valor positivo)
-        }
-
-        tPixel atual;
-        //ter as coordenadas inciais do primeiro pixel
-        atual.coordenadas.X = primeiro.coordenadas.X;
-        atual.coordenadas.Y = primeiro.coordenadas.Y;
-        //ter as cores do primeiro pixel
-        atual.valorR = primeiro.valorR;
-        atual.valorG = primeiro.valorG;
-        atual.valorB = primeiro.valorB;
-        atual.valorA = primeiro.valorA;
-
-        //incrementar cores aos poucos
-        int comprimento = sqrt(deltaX*deltaX+deltaY*deltaY);
-        int incR = (ultimo.valorR - primeiro.valorR)/comprimento;
-        int incG = (ultimo.valorG - primeiro.valorG)/comprimento;
-        int incB = (ultimo.valorB - primeiro.valorB)/comprimento;
-        int incA = (ultimo.valorA - primeiro.valorA)/comprimento;
-
-        if (deltaX == 0){ //é uma coluna
-            for (atual.coordenadas.Y ; atual.coordenadas.Y != ultimo.coordenadas.Y; atual.coordenadas.Y+=incrementaY){
+        if (deltaX == 0){ 
+            for (atual.posicao.Y ; atual.posicao.Y != ultimo.posicao.Y; atual.posicao.Y+=incrementaY){
 
                 interpolar(primeiro, ultimo, &atual);
                 drawLineInterpolado(atual,p3);
             }
-        }else{ //deltaX !=0
-            if (deltaY == 0){ //linha horizontal
-                for (atual.coordenadas.X; atual.coordenadas.X!=ultimo.coordenadas.X; atual.coordenadas.X+=incrementaX){
+        }else{
+            if (deltaY == 0){
+                for (atual.posicao.X; atual.posicao.X!=ultimo.posicao.X; atual.posicao.X+=incrementaX){
 
                     interpolar(primeiro, ultimo, &atual);
                     drawLineInterpolado(atual,p3);
                 }
-            }else{ //nem é uma linha nem uma coluna
+            }else{ 
                 if (abs(deltaX)>=abs(deltaY)){
                     d=2*deltaY-deltaX;
                     incrementaLeste=2*deltaY;
                     incrementaNordeste=2*(deltaY-deltaX);
-                    while(atual.coordenadas.X!=ultimo.coordenadas.X){
+                    while(atual.posicao.X!=ultimo.posicao.X){
                         if(d<=0){
                             d+=incrementaLeste;
-                            atual.coordenadas.X+=incrementaX;
+                            atual.posicao.X+=incrementaX;
                         }else{
                             d+=incrementaNordeste;
-                            atual.coordenadas.X+=incrementaX;
-                            atual.coordenadas.Y+=incrementaY;
+                            atual.posicao.X+=incrementaX;
+                            atual.posicao.Y+=incrementaY;
                         }
                         interpolar(primeiro, ultimo, &atual);
                         drawLineInterpolado(atual,p3);
@@ -431,14 +320,14 @@
                     d=2*deltaX-deltaY;
                     incrementaLeste=2*deltaX;
                     incrementaNordeste=2*(deltaX-deltaY);
-                    while(atual.coordenadas.Y!=ultimo.coordenadas.Y){
+                    while(atual.posicao.Y!=ultimo.posicao.Y){
                         if(d<=0){
                             d+=incrementaLeste;
-                            atual.coordenadas.Y+=incrementaY;
+                            atual.posicao.Y+=incrementaY;
                         }else{
                             d+=incrementaNordeste;
-                            atual.coordenadas.Y+=incrementaY;
-                            atual.coordenadas.X+=incrementaX;
+                            atual.posicao.Y+=incrementaY;
+                            atual.posicao.X+=incrementaX;
                         }
                         interpolar(primeiro, ultimo, &atual);
                         drawLineInterpolado(atual,p3);
@@ -448,6 +337,12 @@
             }
         }
 
+    }
+
+    void drawTriangleInterpolado (tPixel p1, tPixel p2, tPixel p3 ){
+        drawLineInterpolado(p2,p1);
+        drawLineInterpolado(p3,p2);
+        drawLineInterpolado(p1,p3);
     }
 
 
