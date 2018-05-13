@@ -215,8 +215,6 @@ incrementaB = deltaB/quantidadePixels
 ====
 
 
-
-
 <h3> Comentários e Dificuldades </h3>
 <p> Nossa maior dificuldade na implementação foi a generalização do desenho das retas nos octantes, mais especificamente às variações presentes nos valores de |∆x| e |∆y|. Apenas após analisarmos <a target="_blank" href="https://camo.githubusercontent.com/b02ab4b60031f0352751efe3d70355de302b049c/68747470733a2f2f692e696d6775722e636f6d2f57524d425666782e706e67"> esta imagem</a> pudemos compreender melhor as variações. Outro ponto foi a interpolação das linhas, encontrar a quantidade de pixels para adicionar na variável incremento de cada canal. Mas foi sanada no mesmo blog.</p>
 
