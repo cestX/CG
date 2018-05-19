@@ -11,11 +11,17 @@ void MyGlDraw(void)
 	//DesenhaLinha();
     //DesenhaPixels();
 
-    tPixel pixel1 = {256, 256, 255, 0, 0, 255};
-    tPixel pixel2 = {384, 128, 0, 255, 255, 255};
-   	tPixel pixel3 = {128, 128, 0, 0, 255, 255};
-   	tPixel pixel4 = {50, 100, 0, 0, 255, 255};
-    drawTriangleInterpolado(pixel3, pixel2, pixel1);
+	tPixel pixel0 = {500,500,255,255,255,0};
+    tPixel pixel1 = {1, 5, 255, 255, 255, 0};
+    tPixel pixel2 = {1, 3, 255, 255, 255, 0};
+	tPixel pixel3 = {0, 512, 255, 255, 255, 0};
+    tPixel pixel4 = {512, 0, 255, 255, 255, 0};
+	
+	//putPixel (pixel0);
+	DLine (pixel4, pixel3);
+	//HVLine(pixel1, pixel2);
+
+    //drawTriangleInterpolado(pixel3, pixel2, pixel1);
 
 }
 
